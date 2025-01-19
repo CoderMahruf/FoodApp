@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
+from .forms import ItemForm
 from django.http import HttpResponse
 from .models import (
     Item,
@@ -21,3 +22,28 @@ def detail(request,item_id):
         'item':item,
     }
     return render(request,'foodApp/detail.html',context)
+
+def create_item(request):
+    form = ItemForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        return redirect ('foodApp:index')
+    return render(request,'foodApp/item-form.html',{'form':form})
+
+def update_item(request,id):
+    item = Item.objects.get(id=id)
+    form = ItemForm(request.POST or None, instance = item)
+    if form.is_valid():
+        form.save()
+        return redirect('foodApp:index')
+    return render(request,'foodApp/item-form.html',{'form':form,'item':item})
+
+def delete_item(request,id):
+    item = Item.objects.get(id=id)
+    if request.method == "POST":
+        item.delete()
+        return redirect('foodApp:index')
+    return render(request,'foodApp/item-delete.html',{'item':item})
+    
+
+     
